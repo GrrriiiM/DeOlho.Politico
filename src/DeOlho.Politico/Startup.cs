@@ -18,6 +18,8 @@ using DeOlho.EventBus.Abstractions;
 using DeOlho.SeedWork.Domain.Abstractions;
 using DeOlho.SeedWork.Infrastructure.Repositories;
 using DeOlho.Politico.Infrastucture.Repositories;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Threading;
 
 namespace DeOlho.Politico
 {
@@ -33,23 +35,14 @@ namespace DeOlho.Politico
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSeedWork(new DeOlhoDbContextConfiguration(
-                Configuration.GetConnectionString("DeOlho"),
-                this.GetType().Assembly));
+            services.AddSeedWork<Startup>(Configuration);
 
             services.AddScoped<IRepository<Domain.Politico>, Repository<Domain.Politico>>();
 
-            services.AddEventBusRabbitMQ(c => 
-            {
-                c.Configuration(Configuration.GetSection("EventBus"));
-                c.SubscribeMediatorConsumers(this.GetType().Assembly);
-            });
-
-            services.AddMediatR(this.GetType().Assembly);
-
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
+
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IEventBus eventBus)
