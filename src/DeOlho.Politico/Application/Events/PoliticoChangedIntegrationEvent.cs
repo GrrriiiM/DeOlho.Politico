@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,83 +21,138 @@ namespace DeOlho.Politico.Application.Events
 
         public ChangePoliticoWhenPoliticoChangedIntegrationEventHandler(
             DeOlhoDbContext deOlhoDbContext)
-            //IRepository<Domain.Politico> politicoRepository)
         {
-            _deOlhoDbContext = deOlhoDbContext;   
-            //_politicoRepository = politicoRepository;
+            _deOlhoDbContext = deOlhoDbContext;
         }
         public async override Task<Unit> Handle(PoliticoChangedMessage message, CancellationToken cancellationToken)
         {
+            var listaSexo = await _deOlhoDbContext.Set<Sexo>().ToListAsync(cancellationToken);
+            var listaGrauInstrucao = await _deOlhoDbContext.Set<GrauInstrucao>().ToListAsync(cancellationToken);
+            var listaOcupacao = await _deOlhoDbContext.Set<Ocupacao>().ToListAsync(cancellationToken);
+            var listaTipoEleicao = await _deOlhoDbContext.Set<TipoEleicao>().ToListAsync(cancellationToken);
+            var listaEleicao = await _deOlhoDbContext.Set<Eleicao>().ToListAsync(cancellationToken);
+            var listaMandatoSituacao = await _deOlhoDbContext.Set<MandatoSituacao>().ToListAsync(cancellationToken);
+            var listaPartido = await _deOlhoDbContext.Set<Partido>().ToListAsync(cancellationToken);
+            var listaCargo = await _deOlhoDbContext.Set<Cargo>().ToListAsync(cancellationToken);
+
             var politicoRepository = _deOlhoDbContext.Set<Domain.Politico>();
 
-            var politico = await politicoRepository
-                .Include(_ => _.Sexo)
-                .Include(_ => _.GrauInstrucao)
-                .Include(_ => _.Ocupacao)
-                .Include(_ => _.Mandatos)
-                .ThenInclude(_ => _.Eleicao.Tipo)
-                .Include(_ => _.Mandatos)
-                .ThenInclude(_ => _.Partido)
-                .Include(_ => _.Mandatos)
-                .ThenInclude(_ => _.Cargo)
-                .SingleOrDefaultAsync(_ => 
-                    _.CPF == message.NR_CPF_CANDIDATO,
-                    cancellationToken)
-                ?? new Domain.Politico();
+            foreach(var messagePolitico in message.Politicos)
+            {
 
-            var sexo = await _deOlhoDbContext.Set<Sexo>().SingleOrDefaultAsync(_ => _.Id == message.CD_GENERO)
-                ?? new Sexo { Id = message.CD_GENERO, Descricao = message.DS_GENERO };
+                var politico = await politicoRepository
+                    .Include(_ => _.Sexo)
+                    .Include(_ => _.GrauInstrucao)
+                    .Include(_ => _.Ocupacao)
+                    .Include(_ => _.Mandatos)
+                    .ThenInclude(_ => _.Eleicao.Tipo)
+                    .Include(_ => _.Mandatos)
+                    .ThenInclude(_ => _.Partido)
+                    .Include(_ => _.Mandatos)
+                    .ThenInclude(_ => _.Cargo)
+                    .Include(_ => _.Mandatos)
+                    .ThenInclude(_ => _.Situacao)
+                    .SingleOrDefaultAsync(_ => 
+                        _.CPF == messagePolitico.NR_CPF_CANDIDATO,
+                        cancellationToken)
+                    ?? new Domain.Politico();
 
-            var grauInstrucao = await _deOlhoDbContext.Set<GrauInstrucao>().SingleOrDefaultAsync(_ => _.Id == message.CD_GRAU_INSTRUCAO)
-                ?? new GrauInstrucao { Id = message.CD_GRAU_INSTRUCAO, Descricao = message.DS_GRAU_INSTRUCAO };
+                var sexo = listaSexo.FirstOrDefault(_ => _.Id == messagePolitico.CD_GENERO);
+                if (sexo == null)
+                {
+                    sexo = new  Sexo { Id = messagePolitico.CD_GENERO, Descricao = messagePolitico.DS_GENERO }; 
+                    listaSexo.Add(sexo);
+                }
 
-            var ocupacao = await _deOlhoDbContext.Set<Ocupacao>().SingleOrDefaultAsync(_ => _.Id == message.CD_OCUPACAO)
-                ?? new Ocupacao { Id = message.CD_OCUPACAO, Descricao = message.DS_OCUPACAO };
+                var grauInstrucao = listaGrauInstrucao.FirstOrDefault(_ => _.Id == messagePolitico.CD_GRAU_INSTRUCAO);
+                if (grauInstrucao == null)
+                {
+                    grauInstrucao = new GrauInstrucao { Id = messagePolitico.CD_GRAU_INSTRUCAO, Descricao = messagePolitico.DS_GRAU_INSTRUCAO }; 
+                    listaGrauInstrucao.Add(grauInstrucao);
+                }
+                    
 
-            var tipoEleicao = await _deOlhoDbContext.Set<TipoEleicao>().SingleOrDefaultAsync(_ => _.Id == message.CD_TIPO_ELEICAO)
-                ?? new TipoEleicao { Id = message.CD_TIPO_ELEICAO, Descricao = message.NM_TIPO_ELEICAO };
+                var ocupacao = listaOcupacao.FirstOrDefault(_ => _.Id == messagePolitico.CD_OCUPACAO);
+                if (ocupacao == null)
+                {
+                    ocupacao = new Ocupacao { Id = messagePolitico.CD_OCUPACAO, Descricao = messagePolitico.DS_OCUPACAO }; 
+                    listaOcupacao.Add(ocupacao);
+                }
+                    
 
-            var eleicao = await _deOlhoDbContext.Set<Eleicao>().SingleOrDefaultAsync(_ => _.Id == message.CD_ELEICAO)
-                ?? new Eleicao { 
-                    Id = message.CD_ELEICAO,
-                    Ano = message.ANO_ELEICAO,
-                    Descricao = message.DS_ELEICAO,
-                    Data = message.DT_ELEICAO,
-                    Tipo = tipoEleicao
-                };
+                var tipoEleicao = listaTipoEleicao.FirstOrDefault(_ => _.Id == messagePolitico.CD_TIPO_ELEICAO);
+                if (tipoEleicao == null)
+                {
+                    tipoEleicao = new TipoEleicao { Id = messagePolitico.CD_TIPO_ELEICAO, Descricao = messagePolitico.NM_TIPO_ELEICAO }; 
+                    listaTipoEleicao.Add(tipoEleicao);
+                }
+                    
 
-            var partido = await _deOlhoDbContext.Set<Partido>().SingleOrDefaultAsync(_ => _.Id == message.NR_PARTIDO)
-                ?? new Partido { Id = message.NR_PARTIDO, Sigla = message.SG_PARTIDO, Nome = message.NM_PARTIDO };
+                var eleicao = listaEleicao.FirstOrDefault(_ => _.Id == messagePolitico.CD_ELEICAO);
+                if (eleicao == null)
+                {
+                    eleicao = new Eleicao {  
+                        Id = messagePolitico.CD_ELEICAO,
+                        Ano = messagePolitico.ANO_ELEICAO,
+                        Descricao = messagePolitico.DS_ELEICAO,
+                        Data = messagePolitico.DT_ELEICAO,
+                        Tipo = tipoEleicao,
+                    };
+                    listaEleicao.Add(eleicao);
+                }
 
-            var cargo = await _deOlhoDbContext.Set<Cargo>().SingleOrDefaultAsync(_ => _.Id == message.CD_CARGO)
-                ?? new Cargo { Id = message.CD_CARGO, Nome = message.DS_CARGO };
+                var situacao = listaMandatoSituacao.FirstOrDefault(_ => _.Id == messagePolitico.CD_SIT_TOT_TURNO);
+                if (situacao == null)
+                {
+                    situacao = new MandatoSituacao { Id = messagePolitico.CD_SIT_TOT_TURNO, Descricao = messagePolitico.DS_SIT_TOT_TURNO }; 
+                    listaMandatoSituacao.Add(situacao);
+                }
+                    
+
+                var partido = listaPartido.FirstOrDefault(_ => _.Id == messagePolitico.NR_PARTIDO);
+                if (partido == null)
+                {
+                    partido = new Partido { Id = messagePolitico.NR_PARTIDO, Sigla = messagePolitico.SG_PARTIDO, Nome = messagePolitico.NM_PARTIDO }; 
+                    listaPartido.Add(partido);
+                }
+                    
+
+                var cargo = listaCargo.FirstOrDefault(_ => _.Id == messagePolitico.CD_CARGO);
+                if (cargo == null)
+                {
+                    cargo = new Cargo { Id = messagePolitico.CD_CARGO, Nome = messagePolitico.DS_CARGO }; 
+                    listaCargo.Add(cargo);
+                }
+
+                politico.CPF = messagePolitico.NR_CPF_CANDIDATO;
+                politico.Nome = messagePolitico.NM_CANDIDATO;
+                politico.Apelido = messagePolitico.NM_URNA_CANDIDATO;
+                politico.DataNascimento = messagePolitico.DT_NASCIMENTO;
+                politico.CidadeNascimento = messagePolitico.NM_MUNICIPIO_NASCIMENTO;
+                politico.UFNascimento = messagePolitico.SG_UF_NASCIMENTO;
+                politico.Sexo = sexo;
+                politico.GrauInstrucao = grauInstrucao;
+                politico.Ocupacao = ocupacao;
+                politico.DataInformacao = new DateTime(messagePolitico.ANO_ELEICAO, 1 ,1);
+                
+                var mandato = politico.Mandatos.SingleOrDefault(_ => _.Eleicao.Ano == messagePolitico.ANO_ELEICAO) ?? new Mandato();;
             
+                mandato.Eleicao = eleicao;
+                mandato.Cargo = cargo;
+                mandato.Partido = partido;
+                mandato.Situacao = situacao;
+                mandato.Abrangencia = messagePolitico.NM_UE;
 
-            politico.CPF = message.NR_CPF_CANDIDATO;
-            politico.Nome = message.NM_SOCIAL_CANDIDATO;
-            politico.Apelido = message.NM_CANDIDATO;
-            politico.DataNascimento = message.DT_NASCIMENTO;
-            politico.CidadeNascimento = message.NM_MUNICIPIO_NASCIMENTO;
-            politico.UFNascimento = message.SG_UF_NASCIMENTO;
-            politico.Sexo = sexo;
-            politico.GrauInstrucao = grauInstrucao;
-            politico.Ocupacao = ocupacao;
-            politico.DataInformacao = new DateTime(message.ANO_ELEICAO, 1 ,1);
-            
-            var mandato = politico.Mandatos.SingleOrDefault(_ => _.Eleicao.Ano == message.ANO_ELEICAO) ?? new Mandato();;
-            
-            mandato.Eleicao = eleicao;
+                if (mandato.Id == 0)
+                    politico.Mandatos.Add(mandato);
 
-            mandato.Cargo = cargo;
+                politico.TermoPesquisa = politico.BuildTermoPesquisa();
 
-            mandato.Partido = partido;
+                if (politico.Id == 0)
+                    await politicoRepository.AddAsync(politico, cancellationToken);
+                
+            }
 
-            if (mandato.Id == 0)
-                politico.Mandatos.Add(mandato);
-
-            if (politico.Id == 0)
-                await politicoRepository.AddAsync(politico, cancellationToken);
-            
             await _deOlhoDbContext.SaveChangesAsync(cancellationToken);
             
             return Unit.Value;

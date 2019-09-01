@@ -37,6 +37,19 @@ namespace DeOlho.Politico.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MandatoSituacao",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Descricao = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MandatoSituacao", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Ocupacao",
                 columns: table => new
                 {
@@ -104,7 +117,8 @@ namespace DeOlho.Politico.Migrations
                     SexoId = table.Column<long>(nullable: false),
                     GrauInstrucaoId = table.Column<long>(nullable: false),
                     OcupacaoId = table.Column<long>(nullable: false),
-                    DataInformacao = table.Column<DateTime>(nullable: false)
+                    DataInformacao = table.Column<DateTime>(nullable: false),
+                    TermoPesquisa = table.Column<string>("Text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -161,7 +175,8 @@ namespace DeOlho.Politico.Migrations
                     EleicaoId = table.Column<long>(nullable: false),
                     PartidoId = table.Column<long>(nullable: false),
                     CargoId = table.Column<long>(nullable: false),
-                    Suplente = table.Column<bool>(nullable: false)
+                    SituacaoId = table.Column<long>(nullable: false),
+                    Abrangencia = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -188,6 +203,12 @@ namespace DeOlho.Politico.Migrations
                         name: "FK_Mandato_Politico_PoliticoId",
                         column: x => x.PoliticoId,
                         principalTable: "Politico",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Mandato_MandatoSituacao_SituacaoId",
+                        column: x => x.SituacaoId,
+                        principalTable: "MandatoSituacao",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -218,6 +239,11 @@ namespace DeOlho.Politico.Migrations
                 column: "PoliticoId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Mandato_SituacaoId",
+                table: "Mandato",
+                column: "SituacaoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Politico_CPF",
                 table: "Politico",
                 column: "CPF");
@@ -236,6 +262,8 @@ namespace DeOlho.Politico.Migrations
                 name: "IX_Politico_SexoId",
                 table: "Politico",
                 column: "SexoId");
+
+            migrationBuilder.Sql("Alter Table Politico Add FullText(TermoPesquisa)");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -254,6 +282,9 @@ namespace DeOlho.Politico.Migrations
 
             migrationBuilder.DropTable(
                 name: "Politico");
+
+            migrationBuilder.DropTable(
+                name: "MandatoSituacao");
 
             migrationBuilder.DropTable(
                 name: "TipoEleicao");

@@ -12,6 +12,14 @@ namespace DeOlho.Politico.Domain
         public Partido Partido { get; set; }
         public long CargoId { get; set; }
         public Cargo Cargo { get; set; }
-        public bool Suplente { get; set; }
+        public long SituacaoId { get; set; }
+        public MandatoSituacao Situacao { get; set; }
+        public string Abrangencia { get; set; }
+
+        public string BuildTermoPesquisa()
+        {
+            return $"[ {Situacao.Descricao} {Eleicao.Ano} {Cargo.Nome} {Abrangencia} ]";
+        }
+
     }
 }

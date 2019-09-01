@@ -70,6 +70,8 @@ namespace DeOlho.Politico.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("Abrangencia");
+
                     b.Property<long>("CargoId");
 
                     b.Property<long>("EleicaoId");
@@ -78,7 +80,7 @@ namespace DeOlho.Politico.Migrations
 
                     b.Property<long>("PoliticoId");
 
-                    b.Property<bool>("Suplente");
+                    b.Property<long>("SituacaoId");
 
                     b.HasKey("Id");
 
@@ -90,7 +92,21 @@ namespace DeOlho.Politico.Migrations
 
                     b.HasIndex("PoliticoId");
 
+                    b.HasIndex("SituacaoId");
+
                     b.ToTable("Mandato");
+                });
+
+            modelBuilder.Entity("DeOlho.Politico.Domain.MandatoSituacao", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Descricao");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MandatoSituacao");
                 });
 
             modelBuilder.Entity("DeOlho.Politico.Domain.Ocupacao", b =>
@@ -141,6 +157,8 @@ namespace DeOlho.Politico.Migrations
                     b.Property<long>("OcupacaoId");
 
                     b.Property<long>("SexoId");
+
+                    b.Property<string>("TermoPesquisa");
 
                     b.Property<string>("UFNascimento");
 
@@ -209,6 +227,11 @@ namespace DeOlho.Politico.Migrations
                     b.HasOne("DeOlho.Politico.Domain.Politico", "Politico")
                         .WithMany("Mandatos")
                         .HasForeignKey("PoliticoId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("DeOlho.Politico.Domain.MandatoSituacao", "Situacao")
+                        .WithMany()
+                        .HasForeignKey("SituacaoId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
