@@ -117,8 +117,7 @@ namespace DeOlho.Politico.Migrations
                     SexoId = table.Column<long>(nullable: false),
                     GrauInstrucaoId = table.Column<long>(nullable: false),
                     OcupacaoId = table.Column<long>(nullable: false),
-                    DataInformacao = table.Column<DateTime>(nullable: false),
-                    TermoPesquisa = table.Column<string>("Text", nullable: true)
+                    DataInformacao = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -214,6 +213,11 @@ namespace DeOlho.Politico.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Eleicao_Ano",
+                table: "Eleicao",
+                column: "Ano");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Eleicao_TipoId",
                 table: "Eleicao",
                 column: "TipoId");
@@ -262,8 +266,6 @@ namespace DeOlho.Politico.Migrations
                 name: "IX_Politico_SexoId",
                 table: "Politico",
                 column: "SexoId");
-
-            migrationBuilder.Sql("Alter Table Politico Add FullText(TermoPesquisa)");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

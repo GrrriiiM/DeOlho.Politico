@@ -16,10 +16,5 @@ namespace DeOlho.Politico.Domain
         public MandatoSituacao Situacao { get; set; }
         public string Abrangencia { get; set; }
 
-        public string BuildTermoPesquisa()
-        {
-            return $"[ {Situacao.Descricao} {Eleicao.Ano} {Cargo.Nome} {Abrangencia} ]";
-        }
-
     }
 }

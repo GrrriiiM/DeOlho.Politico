@@ -27,12 +27,13 @@ namespace DeOlho.Politico.Infrastucture.Data
     //     }
     // }
 
-    // public class EleicaoEntityMapping : IEntityTypeConfiguration<Domain.Partido>
-    // {
-    //     public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<Domain.Partido> builder)
-    //     {
-    //         builder.HasKey(_ => _.Id);
-    //     }
-    // }
+    public class EleicaoEntityMapping : IEntityTypeConfiguration<Domain.Eleicao>
+    {
+        public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<Domain.Eleicao> builder)
+        {
+            builder.HasKey(_ => _.Id);
+            builder.HasIndex(_ => _.Ano);
+        }
+    }
 
 }

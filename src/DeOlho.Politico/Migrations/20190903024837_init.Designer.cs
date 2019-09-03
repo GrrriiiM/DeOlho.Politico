@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DeOlho.Politico.Migrations
 {
     [DbContext(typeof(DeOlhoDbContext))]
-    [Migration("20190901213104_init")]
+    [Migration("20190903024837_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,6 +49,8 @@ namespace DeOlho.Politico.Migrations
                     b.Property<long>("TipoId");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Ano");
 
                     b.HasIndex("TipoId");
 
@@ -159,8 +161,6 @@ namespace DeOlho.Politico.Migrations
                     b.Property<long>("OcupacaoId");
 
                     b.Property<long>("SexoId");
-
-                    b.Property<string>("TermoPesquisa");
 
                     b.Property<string>("UFNascimento");
 

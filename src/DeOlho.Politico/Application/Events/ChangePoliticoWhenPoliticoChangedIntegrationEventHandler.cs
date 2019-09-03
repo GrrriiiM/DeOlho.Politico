@@ -146,8 +146,6 @@ namespace DeOlho.Politico.Application.Events
                 if (mandato.Id == 0)
                     politico.Mandatos.Add(mandato);
 
-                politico.TermoPesquisa = politico.BuildTermoPesquisa();
-
                 if (politico.Id == 0)
                     await politicoRepository.AddAsync(politico, cancellationToken);
                 

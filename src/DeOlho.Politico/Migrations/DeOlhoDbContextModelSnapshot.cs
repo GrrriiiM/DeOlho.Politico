@@ -48,6 +48,8 @@ namespace DeOlho.Politico.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Ano");
+
                     b.HasIndex("TipoId");
 
                     b.ToTable("Eleicao");
@@ -157,8 +159,6 @@ namespace DeOlho.Politico.Migrations
                     b.Property<long>("OcupacaoId");
 
                     b.Property<long>("SexoId");
-
-                    b.Property<string>("TermoPesquisa");
 
                     b.Property<string>("UFNascimento");
 

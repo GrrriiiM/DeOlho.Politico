@@ -21,11 +21,6 @@ namespace DeOlho.Politico.Domain
         public Ocupacao Ocupacao { get; set; }
         public DateTime DataInformacao { get; set; }
         public List<Mandato> Mandatos { get; set; } = new List<Mandato>();
-        public string TermoPesquisa { get; set; }
 
-        public string BuildTermoPesquisa()
-        {
-            return $"[ {Nome} {Apelido} ] {string.Join(' ', Mandatos.Select(_ => _.BuildTermoPesquisa()))}";
-        }
     }
 }
